@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DIMG_NAME = "${env.TSAPP_DREPO}"
+        DIMG_NAME = 'sriramsuryaa/trend-store-prod'
         DIMG_TAG = "${env.BUILD_NUMBER}"       
     }
 

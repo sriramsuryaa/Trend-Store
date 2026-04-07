@@ -42,6 +42,7 @@ pipeline {
                     kubectl apply -f k8s/service.yaml
 
                     # Wait for rollout to complete
+                    kubectl rollout restart deployment/trend-store
                     kubectl rollout status deployment/trend-store --timeout=300s
 
                     # Show deployment status

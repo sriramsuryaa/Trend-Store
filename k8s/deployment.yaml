@@ -20,6 +20,6 @@ spec:
 
       containers:
         - name: trend-store
-          image: sriramsuryaa/trend-store-prod:latest
+          image: ${TSAPP_DREPO}:latest
           ports:
             - containerPort: 80

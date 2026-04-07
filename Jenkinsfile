@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DIMG_NAME = 'sriramsuryaa/trend-store-prod'
+        DIMG_NAME = '${TSAPP_DREPO}'
         DIMG_TAG = "${env.BUILD_NUMBER}"       
     }
 
@@ -65,7 +65,9 @@ pipeline {
 
         success {
             echo 'Pipeline completed successfully!'
-            echo 'Application deployed to: http://$(kubectl get svc trend-store -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")'
+            sh """
+            Application deployed to: http://$(kubectl get svc trend-store -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+            """
         }
 
         failure {

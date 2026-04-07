@@ -65,8 +65,8 @@ pipeline {
         success {
             echo 'Pipeline completed successfully!'
             sh '''
-            APP_URL=$(kubectl get svc trend-store -o jsonpath={.status.loadBalancer.ingress[0].hostname})
-            echo "Application deployed to: $APP_URL"
+            echo "Application deployed to: "
+            kubectl get svc trend-store -o jsonpath={.status.loadBalancer.ingress[0].hostname}
             '''
         }
 

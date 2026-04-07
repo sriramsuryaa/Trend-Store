@@ -38,16 +38,13 @@ pipeline {
                     kubectl get pods
 
                     # Apply Kubernetes manifests
+                    kubectl apply -f monitoring/nginx-config.yaml 
+                    kubectl apply -f monitoring/nginx-metrics-service.yaml
                     kubectl apply -f k8s/deployment.yaml
                     kubectl apply -f k8s/service.yaml
 
                     # Wait for rollout to complete
                     kubectl rollout status deployment/trend-store --timeout=300s
-
-                    # Run health check
-                    echo 'Running health checks...'
-                    chmod +x deploy-monitoring.sh
-                    ./deploy-monitoring.sh
 
                     # Show deployment status
                     kubectl get pods -l app=trend-store

@@ -44,6 +44,11 @@ pipeline {
                     # Wait for rollout to complete
                     kubectl rollout status deployment/trend-store --timeout=300s
 
+                    # Run health check
+                    echo 'Running health checks...'
+                    chmod +x deploy-monitoring.sh
+                    ./deploy-monitoring.sh
+
                     # Show deployment status
                     kubectl get pods -l app=trend-store
                     kubectl get svc trend-store

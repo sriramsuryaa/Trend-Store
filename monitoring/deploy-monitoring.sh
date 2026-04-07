@@ -1,52 +1,43 @@
 #!/bin/bash
 
-# Minimal Health Check Monitoring
-# Just checks if the application is healthy
-
+# Deploy and expose Grafana + Prometheus + nginx exporter for the Trend Store app.
 set -e
 
-echo "Checking Trend Store Health..."
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Colors
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-NC='\033[0m'
+function get_loadbalancer_host() {
+  local service="$1"
+  local host
+  host=$(kubectl get svc "$service" -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)
+  if [ -z "$host" ]; then
+    host=$(kubectl get svc "$service" -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
+  fi
+  echo "$host"
+}
 
-# Get Trend Store service URL
-SERVICE_URL=$(kubectl get svc trend-store -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null)
+echo "Deploying monitoring stack..."
+kubectl apply -f "$DIR"
 
-if [ -z "$SERVICE_URL" ]; then
-    echo -e "${RED}ERROR: Cannot get Trend Store service URL${NC}"
-    echo "Run: kubectl get svc trend-store"
-    exit 1
-fi
+echo "Waiting for Prometheus and Grafana deployments..."
+kubectl rollout status deployment/prometheus --timeout=180s
+kubectl rollout status deployment/grafana --timeout=180s
 
-echo "Service URL: http://$SERVICE_URL"
+echo "Monitoring stack deployed successfully."
 
-# Check health endpoint
-echo "Checking health endpoint..."
-HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://$SERVICE_URL/health 2>/dev/null || echo "000")
+PROMETHEUS_HOST=$(get_loadbalancer_host prometheus)
+GRAFANA_HOST=$(get_loadbalancer_host grafana)
 
-if [ "$HEALTH_STATUS" = "200" ]; then
-    echo -e "${GREEN}SUCCESS: Application is healthy!${NC}"
+if [ -n "$PROMETHEUS_HOST" ]; then
+  echo "Prometheus: http://$PROMETHEUS_HOST:9090"
 else
-    echo -e "${RED}ERROR: Application health check failed (HTTP $HEALTH_STATUS)${NC}"
-    exit 1
+  echo "Prometheus: service created, use kubectl get svc prometheus to find endpoint or port-forward if needed."
 fi
 
-# Check pod status
-echo "Checking pod status..."
-POD_COUNT=$(kubectl get pods -l app=trend-store --no-headers 2>/dev/null | wc -l)
-RUNNING_PODS=$(kubectl get pods -l app=trend-store -o jsonpath='{.items[*].status.phase}' 2>/dev/null | grep -c "Running" || echo "0")
-
-if [ "$POD_COUNT" -eq "$RUNNING_PODS" ] && [ "$POD_COUNT" -gt 0 ]; then
-    echo -e "${GREEN}SUCCESS: All $POD_COUNT pods are running${NC}"
+if [ -n "$GRAFANA_HOST" ]; then
+  echo "Grafana: http://$GRAFANA_HOST:3000"
+  echo "Grafana credentials: admin/admin"
 else
-    echo -e "${RED}ERROR: $RUNNING_PODS/$POD_COUNT pods are running${NC}"
-    kubectl get pods -l app=trend-store
-    exit 1
+  echo "Grafana: service created, use kubectl get svc grafana to find endpoint or port-forward if needed."
 fi
 
-echo ""
-echo -e "${GREEN}SUCCESS: Trend Store is running healthy!${NC}"
-echo "Access your app: http://$SERVICE_URL"
+echo "Nginx exporter metrics are available at service nginx-metrics:9113 inside the cluster."

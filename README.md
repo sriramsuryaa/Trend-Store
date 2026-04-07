@@ -297,7 +297,29 @@ aws ec2 describe-instances --instance-ids YOUR_INSTANCE_ID
 aws logs tail /aws/jenkins/trendstore --follow
 ```
 
-## 🔒 Security Considerations
+## � Monitoring Stack
+
+The monitoring stack includes:
+- **Prometheus** for metrics collection
+- **Grafana** for visualization
+- **nginx-prometheus-exporter** for Nginx metrics
+
+Deploy monitoring with:
+
+```bash
+cd monitoring
+./deploy-monitoring.sh
+```
+
+After deployment, Grafana is available at `http://<grafana-loadbalancer>:3000` and Prometheus at `http://<prometheus-loadbalancer>:9090`.
+
+Grafana default login:
+- username: `admin`
+- password: `admin`
+
+If the LoadBalancer does not provision automatically, use `kubectl get svc grafana prometheus` or `kubectl port-forward`.
+
+## �🔒 Security Considerations
 
 ### Network Security
 - **VPC Isolation**: Private resources in isolated network

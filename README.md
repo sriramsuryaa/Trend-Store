@@ -1,10 +1,9 @@
 # Trend Store - Complete DevOps Project
-
-A modern DevOps repository that deploys the Trend Store static web app with Docker, Jenkins CI/CD, Terraform infrastructure, Amazon EKS, and monitoring.
+A GitHub Workbook project that demonstrates a complete DevOps workflow. This repository deploys the Trend Store static web app using Docker, Jenkins CI/CD, Terraform infrastructure, Amazon EKS, and monitoring.
 
 ## 📋 Project Overview
 
-This repository implements a full DevOps workflow for the Trend Store application:
+This is a hands-on DevOps workbook project that implements a full DevOps workflow for the Trend Store application:
 
 - **Infrastructure as Code** with Terraform
 - **Docker containerization** for the application and Jenkins
@@ -183,14 +182,54 @@ cd Jenkins
 docker-compose up -d
 ```
 
-### 9. Deploy the application to Kubernetes
+### Jenkins Credentials Setup
+
+Once Jenkins is running, configure the following credentials in **Jenkins > Manage Credentials > System > Global credentials**:
+
+#### 1. DockerHub Credentials
+- **Credential Type**: Username with password
+- **Credential ID**: `dockerhub-credentials`
+- **Username**: Your DockerHub username
+- **Password**: DockerHub Personal Access Token (PAT)
+  - Generate PAT at: https://hub.docker.com/settings/security
+
+#### 2. GitHub Credentials
+- **Credential Type**: Username with password
+- **Credential ID**: `github-credentials`
+- **Username**: Your GitHub username
+- **Password**: GitHub Personal Access Token (PAT)
+  - Generate PAT at: https://github.com/settings/tokens
+  - Scope: `repo` (full control of required repository)
+
+#### 3. GitHub Webhook Secret
+- **Credential Type**: Secret text
+- **Credential ID**: `github-webhook-secret`
+- **Secret**: Generate using OpenSSL:
+  ```bash
+  openssl rand -hex 20
+  ```
+- Configure webhook at: Repository > Settings > Webhooks
+  - Add webhook with this secret and point to Jenkins URL
+
+#### 4. EKS Kubeconfig
+- **Credential Type**: Secret file
+- **Credential ID**: `trend-store-cluster`
+- **File**: Upload your EKS cluster kubeconfig
+  - Get kubeconfig after cluster creation:
+    ```bash
+    aws eks update-kubeconfig --name TS-APP-PRD --region ap-south-1
+    cat ~/.kube/config
+    ```
+  - Create a new file and paste the kubeconfig content
+
+### 10. Deploy the application to Kubernetes
 
 ```bash
 kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
 ```
 
-### 10. Start the monitoring stack
+### 11. Start the monitoring stack
 
 ```bash
 cd monitoring

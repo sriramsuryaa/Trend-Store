@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        def DIMG_NAME = env.TSAPP_DREPO
+        DIMG_NAME = "${env.TSAPP_DREPO}"
         DIMG_TAG = "${env.BUILD_NUMBER}"       
     }
 

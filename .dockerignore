@@ -1,0 +1,32 @@
+# Git
+.git
+.gitignore
+
+# Terraform files (infrastructure, not needed in container)
+Terraform/
+*.tf
+*.tfvars
+terraform.tfvars
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Kubernetes manifests (deployment files, not needed in container)
+k8s/
+*.yaml
+*.yml
+
+# CI/CD files
+Jenkinsfile
+Jenkinsfile.backup
+
+# Docker files
+Dockerfile
+.dockerignore
+
+# Monitoring files
+monitoring/
+deploy-monitoring.sh
+
+# Documentation
+README.md

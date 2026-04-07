@@ -64,10 +64,6 @@ pipeline {
 
         success {
             echo 'Pipeline completed successfully!'
-            sh '''
-            echo "Application deployed to: "
-            echo $(kubectl get svc trend-store -o jsonpath=\'{.status.loadBalancer.ingress[0].hostname}\')
-            '''
         }
 
         failure {

@@ -38,8 +38,6 @@ pipeline {
                     kubectl get pods
 
                     # Apply Kubernetes manifests
-                    kubectl apply -f monitoring/nginx-config.yaml 
-                    kubectl apply -f monitoring/nginx-metrics-service.yaml
                     kubectl apply -f k8s/deployment.yaml
                     kubectl apply -f k8s/service.yaml
 

@@ -7,13 +7,6 @@ pipeline {
     }
 
     stages {
-        stage('Git Checkout') {
-            steps {
-                echo 'Checking out source code from Git repository...'
-                git branch: 'main', changelog: false, credentialsId: 'github-pat', poll: false, url: 'https://github.com/sriramsuryaa/Trend-Store.git'
-            }
-        }
-
         stage('Docker Build') {
             steps {
                 echo 'Building Docker image...'

@@ -9,3 +9,6 @@ LABEL maintainer="developer@trendstore.com" \
 
 # APP_BUILD COPYING
 COPY app/. /usr/share/nginx/html/.
+
+# NGINX CONF
+COPY nginx.conf /etc/nginx/conf.d/default.conf

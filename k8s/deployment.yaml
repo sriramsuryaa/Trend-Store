@@ -15,6 +15,9 @@ spec:
         app: trend-store   
 
     spec:
+      imagePullSecrets:
+        - name: regcred
+
       containers:
         - name: trend-store
           image: sriramsuryaa/trend-store-prod:latest

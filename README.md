@@ -112,15 +112,7 @@ docker tag trend-store:local <username>/trend-store:latest
 docker push <username>/trend-store:latest
 ```
 
-### 5. Create Kubernetes registry secret
-
-```bash
-kubectl create secret docker-registry regcred \
-  --docker-username=<username> \
-  --docker-password=<token>
-```
-
-### 6. Install required tools
+### 5. Install required tools
 
 ```bash
 # Install kubectl
@@ -143,7 +135,7 @@ sudo apt-get update
 sudo apt-get install -y docker-compose
 ```
 
-### 7. Create EKS cluster
+### 6. Create EKS cluster
 
 ```bash
 eksctl create cluster --name TS-APP-PRD \
@@ -152,6 +144,14 @@ eksctl create cluster --name TS-APP-PRD \
   --nodes 2 \
   --instance-types t3.small \
   --instance-name TS-APP-PRD-EKS
+```
+
+### 7. Create Kubernetes registry secret
+
+```bash
+kubectl create secret docker-registry regcred \
+  --docker-username=<username> \
+  --docker-password=<token>
 ```
 
 ### 8. Start Jenkins
@@ -182,7 +182,7 @@ cd Jenkins
 docker-compose up -d
 ```
 
-### Jenkins Credentials Setup
+### 9. Jenkins Credentials Setup
 
 Once Jenkins is running, configure the following credentials in **Jenkins > Manage Credentials > System > Global credentials**:
 

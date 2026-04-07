@@ -3,7 +3,7 @@
 .gitignore
 
 # Terraform files (infrastructure, not needed in container)
-Terraform/
+terraform/
 *.tf
 *.tfvars
 terraform.tfvars
@@ -26,7 +26,6 @@ Dockerfile
 
 # Monitoring files
 monitoring/
-deploy-monitoring.sh
 
 # Documentation
 README.md

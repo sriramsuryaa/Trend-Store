@@ -1,86 +1,90 @@
 # Trend Store - Complete DevOps Project
 
-A comprehensive DevOps project demonstrating modern cloud-native application deployment with Infrastructure as Code (IaC), CI/CD pipelines, and container orchestration.
+A modern DevOps repository that deploys the Trend Store static web app with Docker, Jenkins CI/CD, Terraform infrastructure, Amazon EKS, and monitoring.
 
 ## 📋 Project Overview
 
-This project implements a complete DevOps workflow for a Trend Store e-commerce application, featuring:
+This repository implements a full DevOps workflow for the Trend Store application:
 
-- **Infrastructure as Code** using Terraform
-- **Containerized Application** with Docker
-- **CI/CD Pipeline** using Jenkins
-- **Container Orchestration** with Kubernetes (EKS)
-- **Automated Deployments** with zero-downtime updates
+- **Infrastructure as Code** with Terraform
+- **Docker containerization** for the application and Jenkins
+- **CI/CD pipeline** with Jenkins
+- **Kubernetes deployment** on Amazon EKS
+- **Monitoring stack** using Prometheus and Grafana
 
 ## 🏗️ Architecture & Technology Stack
 
 ### Infrastructure Layer
-- **Cloud Provider**: AWS (ap-south-2 region)
-- **IaC Tool**: Terraform v1.14.8
-- **Virtual Network**: VPC with public/private subnets
-- **Compute**: EC2 instance (Ubuntu 22.04) with Docker
-- **Container Runtime**: Docker with host networking
-- **Orchestration**: Amazon EKS (Kubernetes)
+- **Cloud Provider**: AWS
+- **IaC Tool**: Terraform
+- **Orchestration**: Amazon EKS
+- **Bootstrap script**: `terraform/init.sh`
 
 ### Application Layer
-- **Frontend**: Static HTML/CSS/JavaScript (Nginx-based)
-- **Web Server**: Nginx Alpine
-- **Container Registry**: DockerHub
-- **Load Balancing**: AWS LoadBalancer Service
+- **Frontend**: Static HTML/CSS/JS served by Nginx
+- **Web Server**: Nginx based on `nginx:alpine`
+- **App config**: `nginx.conf`
+- **Container image**: built from `Dockerfile`
 
 ### CI/CD Layer
-- **CI/CD Tool**: Jenkins (Docker container)
-- **Version Control**: Git
-- **Build Tool**: Docker
-- **Deployment Tool**: kubectl
-- **Artifact Storage**: DockerHub Registry
+- **CI/CD Tool**: Jenkins
+- **Pipeline**: `Jenkinsfile`
+- **Jenkins compose**: `Jenkins/docker-compose.yaml`
+- **Deploy commands**: `kubectl apply -f k8s/`
 
-### Monitoring & Security
-- **Access Control**: IAM Roles and Security Groups
-- **Encryption**: EBS volume encryption
-- **Network Security**: VPC isolation with security groups
+### Monitoring Layer
+- **Docker Compose**: `monitoring/docker-compose.yaml`
+- **Prometheus config**: `monitoring/prometheus.yaml`
+- **Exporter**: Nginx Prometheus exporter
+- **Dashboard**: Grafana
 
 ## 📁 Project Structure
 
 ```
 Trend-Store/
-├── app/                    # Static web application files
-│   ├── index.html
-│   └── assets/
-├── Dockerfile             # Docker image definition
-├── Jenkinsfile           # CI/CD pipeline definition
-├── k8s/                  # Kubernetes manifests
-│   ├── deployment.yaml   # Application deployment
-│   └── service.yaml      # LoadBalancer service
-├── Terraform/            # Infrastructure as Code
-│   ├── main.tf          # Core infrastructure
-│   ├── variables.tf     # Configuration variables
-│   ├── outputs.tf       # Output values
-│   └── init.sh          # EC2 initialization script
-└── README.md            # This documentation
+├── .dockerignore
+├── Dockerfile
+├── Jenkinsfile
+├── Jenkins/
+│   └── docker-compose.yaml
+├── app/
+│   └── ...
+├── k8s/
+│   ├── deployment.yaml
+│   └── service.yaml
+├── monitoring/
+│   ├── docker-compose.yaml
+│   └── prometheus.yaml
+├── nginx.conf
+├── terraform/
+│   └── init.sh
+└── README.md
 ```
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-1. **AWS Account** with appropriate permissions
-2. **AWS CLI** configured with credentials
-3. **Terraform** v1.14.8+ installed
-4. **Git** for version control
-5. **DockerHub** account for container registry
+- AWS account and AWS CLI configured
+- Terraform installed
+- Git installed
+- Docker installed
+- Docker Compose installed
+- `kubectl` installed
+- `eksctl` installed
+- DockerHub account
 
-### Step 1: Clone Repository
+### 1. Clone repository
 
 ```bash
 git clone https://github.com/your-username/trend-store.git
 cd trend-store
 ```
 
-### Step 2: Deploy Infrastructure
+### 2. Deploy infrastructure with Terraform
 
 ```bash
-cd Terraform
+cd terraform
 terraform init
 terraform plan
 terraform apply
@@ -88,134 +92,145 @@ terraform apply
 
 **Expected Output:**
 ```
-jenkins_public_ip = "13.127.XXX.XXX"
-jenkins_url = "http://13.127.XXX.XXX:8080"
+jenkins_public_ip = "YOUR_EC2_PUBLIC_IP"
+jenkins_url = "http://YOUR_EC2_PUBLIC_IP:8080"
 ```
 
-### Step 3: Access Jenkins
-
-1. Open browser: `http://YOUR_PUBLIC_IP:8080`
-2. Get initial admin password:
-   ```bash
-   # SSH into Jenkins server
-   ssh ubuntu@YOUR_PUBLIC_IP
-
-   # Get Jenkins password
-   sudo docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
-   ```
-3. Complete Jenkins setup wizard
-
-### Step 4: Configure Jenkins Pipeline
-
-1. **Install Plugins:**
-   - Docker Pipeline
-   - Kubernetes CLI
-   - Git
-
-2. **Add Credentials:**
-   - `dockerhub-credentials`: DockerHub username + token
-   - `kubeconfig`: EKS cluster kubeconfig file
-
-3. **Create Pipeline Job:**
-   - Name: `trend-store-cicd`
-   - Type: Pipeline
-   - SCM: Git (this repository)
-   - Script Path: `Jenkinsfile`
-
-### Step 5: Configure EKS (Optional)
-
-If you want to deploy to EKS instead of EC2:
+### 3. Build and test locally
 
 ```bash
-# Create EKS cluster (example)
-eksctl create cluster --name trend-store-cluster --region ap-south-2
-
-# Get kubeconfig
-aws eks update-kubeconfig --name trend-store-cluster --region ap-south-2
+docker build -t trend-store:local .
+docker run -d --name trend-store-local -p 8080:80 trend-store:local
+curl -I http://localhost:8080/health
 ```
 
-## 🔧 Infrastructure Details
+### 4. Create DockerHub repository
 
-### VPC Configuration
-- **CIDR Block**: 10.0.0.0/16
-- **Public Subnet**: 10.0.1.0/24 (auto-assigns public IPs)
-- **Internet Gateway**: Enables internet access
-- **Route Tables**: Public routing for internet connectivity
+Push the image to your DockerHub repository:
 
-### EC2 Instance
-- **AMI**: Ubuntu 22.04 LTS (Canonical)
-- **Instance Type**: t3.medium (2 vCPU, 4GB RAM)
-- **Storage**: 50GB gp3 EBS (encrypted)
-- **Networking**: Public subnet with auto-assigned public IP
-
-### Security Groups
-- **SSH Access**: Port 22 (0.0.0.0/0 - restrict in production)
-- **Jenkins Access**: Port 8080 (0.0.0.0/0)
-- **Egress**: All outbound traffic allowed
-
-### IAM Configuration
-- **EC2 Role**: Basic permissions for EC2 operations
-- **Instance Profile**: Allows EC2 to assume the role
-
-## 🐳 Application Containerization
-
-### Dockerfile Analysis
-
-```dockerfile
-FROM nginx:alpine                    # Lightweight base image
-LABEL maintainer="developer@trendstore.com"
-COPY app/. /usr/share/nginx/html/.   # Static files
-EXPOSE 80                           # Nginx default port
+```bash
+docker tag trend-store:local <username>/trend-store:latest
+docker push <username>/trend-store:latest
 ```
 
-### Docker Image Details
-- **Base Image**: nginx:alpine (small footprint)
-- **Application**: Static HTML/CSS/JS e-commerce site
-- **Port**: 80 (internal), mapped to host port 8080
-- **Registry**: DockerHub (sriramsuryaa/trend-store-dev)
+### 5. Create Kubernetes registry secret
+
+```bash
+kubectl create secret docker-registry regcred \
+  --docker-username=<username> \
+  --docker-password=<token>
+```
+
+### 6. Install required tools
+
+```bash
+# Install kubectl
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+
+# Install AWS CLI
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+# Install eksctl
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" \
+  | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin/
+
+# Install docker-compose
+sudo apt-get update
+sudo apt-get install -y docker-compose
+```
+
+### 7. Create EKS cluster
+
+```bash
+eksctl create cluster --name TS-APP-PRD \
+  --region ap-south-1 \
+  --nodegroup-name TS-APP-PRD-NG \
+  --nodes 2 \
+  --instance-types t3.small \
+  --instance-name TS-APP-PRD-EKS
+```
+
+### 8. Start Jenkins
+
+The repository contains a Jenkins Compose file under `Jenkins/docker-compose.yaml`:
+
+```yaml
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - /var/lib/jenkins/:/var/jenkins_home
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+      - /usr/local/bin/kubectl:/usr/local/bin/kubectl
+      - /home/ubuntu/.aws:/var/jenkins_home/.aws:ro
+```
+
+Run Jenkins with:
+
+```bash
+cd Jenkins
+docker-compose up -d
+```
+
+### 9. Deploy the application to Kubernetes
+
+```bash
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+```
+
+### 10. Start the monitoring stack
+
+```bash
+cd monitoring
+docker-compose up -d
+```
+
+The monitoring stack uses:
+- `monitoring/docker-compose.yaml`
+- `monitoring/prometheus.yaml`
+
+## 📌 Notes on current repository files
+
+- `Dockerfile` builds the Trend Store app with `nginx:alpine`
+- `nginx.conf` configures the app and exposes `/health` and `/stub_status`
+- `Jenkinsfile` defines the CI/CD pipeline to build, push, and deploy the app
+- `Jenkins/docker-compose.yaml` starts Jenkins with Docker and kubectl mounted
+- `terraform/init.sh` bootstraps Docker and starts Jenkins with host networking
+- `k8s/deployment.yaml` and `k8s/service.yaml` deploy the app to Kubernetes
+- `monitoring/docker-compose.yaml` starts Prometheus, Grafana, and the Nginx exporter
+- `monitoring/prometheus.yaml` configures Prometheus scraping
 
 ## 🔄 CI/CD Pipeline
 
-### Pipeline Stages
+The Jenkins pipeline performs these stages:
 
-1. **Git Checkout**
-   ```groovy
-   checkout scm  // Pulls latest code
-   ```
+1. Build Docker image
+2. Tag and push image to DockerHub
+3. Deploy Kubernetes manifests
+4. Restart and validate the `trend-store` deployment
 
-2. **Docker Build**
-   ```groovy
-   docker build -t image:${BUILD_NUMBER} .
-   docker tag image:${BUILD_NUMBER} image:latest
-   ```
+### Jenkins pipeline details
 
-3. **Docker Push**
-   ```groovy
-   docker login -u $USER -p $TOKEN
-   docker push image:${BUILD_NUMBER}
-   docker push image:latest
-   ```
-
-4. **Deploy to EKS**
-   ```groovy
-   kubectl apply -f k8s/
-   kubectl rollout status deployment/trend-store
-   ```
-
-### Environment Variables
-- `DOCKERHUB_CREDENTIALS`: Registry authentication
-- `DOCKER_IMAGE_NAME`: Repository name
-- `DOCKER_IMAGE_TAG`: Build versioning
-- `KUBECONFIG_CREDENTIALS`: Cluster access
-
-### Post-Build Actions
-- **Success**: Display service URL
-- **Failure**: Show pod status and logs
-- **Always**: Clean up Docker images
+- Uses `dockerhub-credentials` for DockerHub authentication
+- Uses `trend-store-cluster` kubeconfig file credential for cluster access
+- Cleans up local Docker images after completion
 
 ## ☸️ Kubernetes Deployment
 
 ### Deployment Manifest
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -227,15 +242,21 @@ spec:
     matchLabels:
       app: trend-store
   template:
+    metadata:
+      labels:
+        app: trend-store
     spec:
+      imagePullSecrets:
+        - name: regcred
       containers:
-      - name: trend-store
-        image: sriramsuryaa/trend-store-dev:latest
-        ports:
-        - containerPort: 80
+        - name: trend-store
+          image: sriramsuryaa/trend-store-prod:latest
+          ports:
+            - containerPort: 80
 ```
 
 ### Service Manifest
+
 ```yaml
 apiVersion: v1
 kind: Service
@@ -246,284 +267,21 @@ spec:
     app: trend-store
   type: LoadBalancer
   ports:
-  - port: 80
-    targetPort: 80
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
 ```
 
 ### Deployment Strategy
-- **Rolling Updates**: Zero-downtime deployments
-- **Replica Count**: 2 pods for high availability
-- **Load Balancer**: AWS ELB for external access
-- **Health Checks**: Automatic pod health monitoring
 
-## 📊 Monitoring & Troubleshooting
+- Rolling updates for zero downtime
+- Two replicas for availability
+- LoadBalancer service for external access
+- Nginx health endpoint used by monitoring and readiness checks
 
-### Application Monitoring
+## 📝 Credits
 
-```bash
-# Check pod status
-kubectl get pods -l app=trend-store
+**Trend Store Application**: Developed by [Vennil Avadhoot](https://github.com/Vennilavanguvi/Trend.git)
 
-# View application logs
-kubectl logs -l app=trend-store
-
-# Check service endpoints
-kubectl get svc trend-store
-
-# Monitor deployment rollout
-kubectl rollout status deployment/trend-store
-```
-
-### Jenkins Monitoring
-
-```bash
-# Check Jenkins container
-docker ps | grep jenkins
-
-# View Jenkins logs
-docker logs jenkins
-
-# Access Jenkins CLI
-docker exec -it jenkins bash
-```
-
-### Infrastructure Monitoring
-
-```bash
-# Check EC2 instance
-aws ec2 describe-instances --instance-ids YOUR_INSTANCE_ID
-
-# View CloudWatch logs (if configured)
-aws logs tail /aws/jenkins/trendstore --follow
-```
-
-## � Monitoring Stack
-
-The monitoring stack includes:
-- **Prometheus** for metrics collection
-- **Grafana** for visualization
-- **nginx-prometheus-exporter** for Nginx metrics
-
-Deploy monitoring with:
-
-```bash
-cd monitoring
-./deploy-monitoring.sh
-```
-
-After deployment, Grafana is available at `http://<grafana-loadbalancer>:3000` and Prometheus at `http://<prometheus-loadbalancer>:9090`.
-
-Grafana default login:
-- username: `admin`
-- password: `admin`
-
-If the LoadBalancer does not provision automatically, use `kubectl get svc grafana prometheus` or `kubectl port-forward`.
-
-## �🔒 Security Considerations
-
-### Network Security
-- **VPC Isolation**: Private resources in isolated network
-- **Security Groups**: Minimal required port access
-- **Encrypted Storage**: EBS volumes with encryption
-
-### Access Control
-- **IAM Roles**: Least privilege principle
-- **SSH Keys**: Secure key-based authentication
-- **Jenkins Credentials**: Secure credential storage
-
-### Container Security
-- **Non-root User**: Jenkins runs as jenkins user
-- **Minimal Base Images**: Alpine Linux for smaller attack surface
-- **Regular Updates**: Keep base images updated
-
-## 🧪 Testing the Deployment
-
-### Manual Testing
-
-1. **Access Application:**
-   ```bash
-   curl http://YOUR_LOADBALANCER_URL
-   ```
-
-2. **Check Application Health:**
-   ```bash
-   kubectl exec -it $(kubectl get pods -l app=trend-store -o jsonpath='{.items[0].metadata.name}') -- curl localhost
-   ```
-
-3. **Load Testing:**
-   ```bash
-   # Simple load test
-   for i in {1..10}; do curl -s http://YOUR_LOADBALANCER_URL > /dev/null & done
-   ```
-
-### Automated Testing
-
-Add to Jenkinsfile for comprehensive testing:
-
-```groovy
-stage('Test') {
-    steps {
-        sh '''
-            # Unit tests (if applicable)
-            # Integration tests
-            # Load tests
-            echo "Running tests..."
-        '''
-    }
-}
-```
-
-## 🚀 Scaling & Optimization
-
-### Horizontal Scaling
-
-```bash
-# Scale deployment
-kubectl scale deployment trend-store --replicas=5
-
-# Auto-scaling (requires HPA)
-kubectl autoscale deployment trend-store --cpu-percent=70 --min=2 --max=10
-```
-
-### Performance Optimization
-
-1. **Resource Limits:**
-   ```yaml
-   resources:
-     requests:
-       memory: "128Mi"
-       cpu: "100m"
-     limits:
-       memory: "256Mi"
-       cpu: "200m"
-   ```
-
-2. **Caching:** Implement CDN for static assets
-3. **Database:** Add persistent storage if needed
-
-## 🛠️ Customization & Extensions
-
-### Adding Environment Variables
-
-```yaml
-env:
-- name: NODE_ENV
-  value: "production"
-- name: API_URL
-  value: "https://api.trendstore.com"
-```
-
-### Adding ConfigMaps/Secrets
-
-```yaml
-envFrom:
-- configMapRef:
-    name: trend-store-config
-- secretRef:
-    name: trend-store-secrets
-```
-
-### Multi-Environment Deployment
-
-```groovy
-// Add to Jenkinsfile
-stage('Deploy to Staging') {
-    when {
-        branch 'develop'
-    }
-    steps {
-        // Deploy to staging environment
-    }
-}
-
-stage('Deploy to Production') {
-    when {
-        branch 'main'
-    }
-    steps {
-        // Deploy to production environment
-    }
-}
-```
-
-## 📈 Cost Optimization
-
-### Infrastructure Costs
-- **EC2**: t3.medium (~$30/month)
-- **EBS**: 50GB gp3 (~$5/month)
-- **EKS**: Per pod pricing
-- **Load Balancer**: ~$20/month
-
-### Cost Saving Tips
-1. **Use Spot Instances** for non-production
-2. **Scheduled Scaling** - reduce replicas at night
-3. **Right-size Resources** based on actual usage
-4. **Clean up Resources** when not in use
-
-## 🔄 Backup & Recovery
-
-### Application Backup
-```bash
-# Backup Jenkins data
-docker run --rm -v jenkins_data:/data -v $(pwd):/backup alpine tar czf /backup/jenkins-backup.tar.gz -C /data .
-```
-
-### Infrastructure Backup
-```bash
-# Terraform state backup
-terraform state pull > terraform.tfstate.backup
-
-# AMI creation for EC2
-aws ec2 create-image --instance-id YOUR_INSTANCE_ID --name "jenkins-backup-$(date +%Y%m%d)"
-```
-
-## 📚 Learning Outcomes
-
-This project demonstrates:
-
-- **Infrastructure as Code** principles
-- **Container orchestration** with Kubernetes
-- **CI/CD pipeline** implementation
-- **Cloud-native** application deployment
-- **DevOps best practices** and automation
-- **Monitoring and troubleshooting** techniques
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/new-feature`
-3. Commit changes: `git commit -am 'Add new feature'`
-4. Push to branch: `git push origin feature/new-feature`
-5. Create Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🆘 Support & Issues
-
-### Common Issues & Solutions
-
-1. **Jenkins not accessible:**
-   - Check security group allows port 8080
-   - Verify Docker container is running: `docker ps`
-
-2. **Pipeline fails at Docker push:**
-   - Verify DockerHub credentials in Jenkins
-   - Check repository permissions
-
-3. **EKS deployment fails:**
-   - Validate kubeconfig credentials
-   - Check EKS cluster status: `aws eks describe-cluster`
-
-### Getting Help
-
-- **Documentation**: Check AWS, Docker, Kubernetes docs
-- **Logs**: Use `kubectl logs` and Jenkins console output
-- **Community**: Stack Overflow, DevOps forums
-
----
-
-**Built with ❤️ for DevOps learning and demonstration**
-
-*Last updated: April 2026*
+**DevOps Infrastructure & Automation**: Terraform, Jenkins CI/CD pipeline, Kubernetes deployment, monitoring stack, and cloud infrastructure setup implemented by me.

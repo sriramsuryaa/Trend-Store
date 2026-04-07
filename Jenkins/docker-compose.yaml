@@ -1,0 +1,14 @@
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - /var/lib/jenkins/:/var/jenkins_home
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+      - /usr/local/bin/kubectl:/usr/local/bin/kubectl
+      - /home/ubuntu/.aws:/var/jenkins_home/.aws:ro

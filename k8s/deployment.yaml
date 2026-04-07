@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
         - name: trend-store
-          image: sriramsuryaa/trend-store-dev:latest
+          image: sriramsuryaa/trend-store-prod:latest
           ports:
             - containerPort: 80

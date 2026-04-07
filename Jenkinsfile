@@ -58,5 +58,29 @@ pipeline {
                     }
                 }
             }
+            
    }
+       post {
+        always {
+            echo 'Cleaning up Docker images...'
+            sh """
+                docker rmi ${DIMG_NAME}:${DIMG_TAG} || true
+                docker rmi ${DIMG_NAME}:latest || true
+                docker system prune -f
+            """
+        }
+
+        success {
+            echo 'Pipeline completed successfully!'
+            echo "Application deployed to: http://\$(kubectl get svc trend-store -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
+        }
+
+        failure {
+            echo 'Pipeline failed!'
+            sh """
+                kubectl get pods -l app=trend-store || true
+                kubectl describe deployment trend-store || true
+            """
+        }
+    }
 }
